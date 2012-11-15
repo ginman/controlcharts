@@ -10,6 +10,12 @@ float[] InputArray;
 int numPoints = 10;
 //String currentTab = "peak";
 
+    String[] logfile;
+    String[] logfiletemp;
+    String directory;
+    String filename = "/N48AC.TXT";
+    String url = "http://172.28.64.54/";  
+
 
 boolean updatebuttonpressed = false;
 boolean locked = false;
@@ -260,6 +266,53 @@ void setup(){
   numPoints = 10;
   view10.alert = true;
   currentView = peakTab;
+  
+  
+  // IMPORT DATA FROM THE LOG FILES
+    
+//    // import the data from the log file
+//    String dirtest = dataPath("");
+//    println(dirtest);
+    
+//    println(dataPath("/home/ginman/Processing/loganalysis/data/logs/perry"));
+    
+//    File dir = new File(dataPath("/home/ginman/Processing/loganalysis/data/logs/perry"));
+
+
+//    File dir = new File("/var/www/logs/perry");
+//    String[] foldernames = dir.list();
+    
+    String[] foldernames = loadStrings(url + "logs/foldernames.txt");
+    println(foldernames);
+    
+    //logfile = loadStrings("N97C_LOG.TXT");
+    directory = url + "logs/perry/" + foldernames[0] + "/SW48A" + filename;
+    logfile = loadStrings(directory);
+    println(directory);
+
+    
+    println(logfile);
+    
+    for (int index = 1; index < foldernames.length; index++){
+      
+      directory = url + "/logs/perry/" + foldernames[index] + "/SW48A" + filename;
+
+      logfiletemp = loadStrings(directory);
+      
+      if (logfiletemp==null){
+        println("No templog file found");
+      }
+      else{
+        //splice(logfile,logfiletemp, 0);
+        logfile = concat(logfile,logfiletemp);
+       
+      }
+    }
+  
+  
+  
+  
+  
 }
 
 void draw(){
@@ -285,52 +338,9 @@ void draw(){
     // color over the non-tab parts of the window
     rect(0,yaxislocation,width,height-yaxislocation);
     rect(0,0,xaxislocation-1,yaxislocation);
-    String[] logfile;
-    String[] logfiletemp;
-    String directory;
-    String filename = "/N48AC.TXT";
-    
-    println("You've made it to 1");
-    
-//    // import the data from the log file
-//    String dirtest = dataPath("");
-//    println(dirtest);
-    
-//    println(dataPath("/home/ginman/Processing/loganalysis/data/logs/perry"));
-    
-//    File dir = new File(dataPath("/home/ginman/Processing/loganalysis/data/logs/perry"));
-    File dir = new File("/home/ginman/Processing/loganalysis/data/logs/perry");
-    String[] foldernames = dir.list();
-    
-    println(foldernames);
     
     
-    println("You've made it to 2");
-    
-    println(dir);
-    
-//    String[] foldernames = dir.list();
-    
-    //logfile = loadStrings("N97C_LOG.TXT");
-    directory = "/home/ginman/Processing/loganalysis/data/logs/perry/" + foldernames[0] + "/SW48A" + filename;
-    println(directory);
-    logfile = loadStrings(directory);
-    
-    for (int index = 1; index < foldernames.length; index++){
-      
-      directory = "/home/ginman/Processing/loganalysis/data/logs/perry/" + foldernames[index] + "/SW48A" + filename;
 
-      logfiletemp = loadStrings(directory);
-      
-      if (logfiletemp==null){
-        println("No log file found");
-      }
-      else{
-        //splice(logfile,logfiletemp, 0);
-        logfile = concat(logfile,logfiletemp);
-       
-      }
-    }
 
     
 //    logfile = loadStrings("/home/ginman/Processing/loganalysis/web-export/N97C_LOG.TXT");
