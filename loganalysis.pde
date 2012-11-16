@@ -36,18 +36,18 @@ class Button{
   int buttonHeight;
   int buttonWidth;
   String buttonText;
-  color basecolor, highlightcolor, alertcolor;
+  color basecolor, highlightcolor, alarmcolor;
   color currentcolor;
   boolean over = false;
   boolean pressed = false;
-  boolean alert = false;
+  boolean alarm = false;
   boolean focus = false;
   int lastViewNumber;
   
   void update(){
     
-    if(alert){
-      currentcolor = alertcolor;
+    if(alarm){
+      currentcolor = alarmcolor;
       if(over()){
       currentcolor = highlightcolor;
       }
@@ -90,7 +90,7 @@ class Button{
 }
 class RectButton extends Button
 {
-  RectButton(int ix, int iy, int iwidth, int iheight, color icolor, color ihighlight, color ialert, String ibuttonText) 
+  RectButton(int ix, int iy, int iwidth, int iheight, color icolor, color ihighlight, color ialarm, String ibuttonText) 
   {
     x = ix;
     y = iy;
@@ -98,7 +98,7 @@ class RectButton extends Button
     buttonWidth = iwidth;
     buttonHeight = iheight;
     basecolor = icolor;
-    alertcolor = ialert;
+    alarmcolor = ialarm;
     highlightcolor = ihighlight;
     currentcolor = basecolor;
   }
@@ -146,10 +146,10 @@ void update(int x, int y)
   if(mousePressed) {
     if(updateButton.pressed()) {
       updatebuttonpressed = true;
-      peakTab.alert = false;
-      avgTab.alert = false;
-      platlenTab.alert = false;
-      platavgTab.alert = false;
+      peakTab.alarm = false;
+      avgTab.alarm = false;
+      platlenTab.alarm = false;
+      platavgTab.alarm = false;
       drawtag = 1;
     } 
     if(peakTab.pressed()){
@@ -159,7 +159,7 @@ void update(int x, int y)
       platavgTab.focus = false;
       currentView = peakTab;
       drawtag = 1;
-      peakTab.alert = false;
+      peakTab.alarm = false;
     }
     if(avgTab.pressed()){
       peakTab.focus = false;
@@ -168,7 +168,7 @@ void update(int x, int y)
       platavgTab.focus = false;
       currentView = avgTab;
       drawtag = 1;
-      avgTab.alert = false;
+      avgTab.alarm = false;
     }
     if(platlenTab.pressed()){
       peakTab.focus = false;
@@ -177,7 +177,7 @@ void update(int x, int y)
       platavgTab.focus = false;
       currentView = platlenTab;
       drawtag = 1;
-      platlenTab.alert = false;
+      platlenTab.alarm = false;
     }
     if(platavgTab.pressed()){
       platavgTab.focus = true;
@@ -187,52 +187,52 @@ void update(int x, int y)
       
       currentView = platavgTab;
       drawtag = 1;
-      platavgTab.alert = false;
+      platavgTab.alarm = false;
     }
     if(view5.pressed()){
       numPoints = 5;
       drawtag = 1;
-      view5.alert = true;
-      view10.alert = false;
-      view20.alert = false;
-      view50.alert = false;
-      viewAll.alert = false;
+      view5.alarm = true;
+      view10.alarm = false;
+      view20.alarm = false;
+      view50.alarm = false;
+      viewAll.alarm = false;
     }
     if(view10.pressed()){
       numPoints = 10;
       drawtag = 1;
-      view10.alert = true;
-      view5.alert = false;
-      view20.alert = false;
-      view50.alert = false;
-      viewAll.alert = false;
+      view10.alarm = true;
+      view5.alarm = false;
+      view20.alarm = false;
+      view50.alarm = false;
+      viewAll.alarm = false;
     }
     if(view20.pressed()){
       numPoints = 20;
       drawtag = 1;
-      view20.alert = true;
-      view5.alert = false;
-      view10.alert = false;
-      view50.alert = false;
-      viewAll.alert = false;
+      view20.alarm = true;
+      view5.alarm = false;
+      view10.alarm = false;
+      view50.alarm = false;
+      viewAll.alarm = false;
     }
      if(view50.pressed()){
       numPoints = 50;
       drawtag = 1;
-      view50.alert = true;
-      view5.alert = false;
-      view10.alert = false;
-      view20.alert = false;
-      viewAll.alert = false;
+      view50.alarm = true;
+      view5.alarm = false;
+      view10.alarm = false;
+      view20.alarm = false;
+      viewAll.alarm = false;
     }
      if(viewAll.pressed()){
       numPoints = 2000;
       drawtag = 1;
-      viewAll.alert = true;
-      view5.alert = false;
-      view10.alert = false;
-      view50.alert = false;
-      view20.alert = false;
+      viewAll.alarm = true;
+      view5.alarm = false;
+      view10.alarm = false;
+      view50.alarm = false;
+      view20.alarm = false;
     }
   }
 }      
@@ -247,24 +247,24 @@ void setup(){
   
   color buttoncolor = color(153);
   color highlight = color(100);
-  color alertcolor = color(185, 0, 0);
+  color alarmcolor = color(185, 0, 0);
   //create update button
   sidebarMargin = (int)round(1.5*xaxislocation + axisscale); 
   buttony = (int)round(yaxislocation);
   int tabwidth = 3*buttony;
   // String updateButtonText = "Update";
-  updateButton = new RectButton(sidebarMargin, buttony, 3*buttony, buttony, buttoncolor, highlight, alertcolor, "Update"); 
-  peakTab = new RectButton(round(xaxislocation), 0, tabwidth, buttony, buttoncolor, highlight, alertcolor, "Peak");
-  avgTab = new RectButton(round(xaxislocation)+tabwidth, 0 , tabwidth, buttony, buttoncolor, highlight, alertcolor, "Average");
-  platlenTab = new RectButton(round(xaxislocation)+2*tabwidth, 0 , round(1.5*tabwidth), buttony, buttoncolor, highlight, alertcolor, "Plateau Time");
-  platavgTab = new RectButton(round(xaxislocation)+2*tabwidth+round(1.5*tabwidth), 0 , round(1.5*tabwidth), buttony, buttoncolor, highlight, alertcolor, "Plateau Avg");
+  updateButton = new RectButton(sidebarMargin, buttony, 3*buttony, buttony, buttoncolor, highlight, alarmcolor, "Update"); 
+  peakTab = new RectButton(round(xaxislocation), 0, tabwidth, buttony, buttoncolor, highlight, alarmcolor, "Peak");
+  avgTab = new RectButton(round(xaxislocation)+tabwidth, 0 , tabwidth, buttony, buttoncolor, highlight, alarmcolor, "Average");
+  platlenTab = new RectButton(round(xaxislocation)+2*tabwidth, 0 , round(1.5*tabwidth), buttony, buttoncolor, highlight, alarmcolor, "Plateau Time");
+  platavgTab = new RectButton(round(xaxislocation)+2*tabwidth+round(1.5*tabwidth), 0 , round(1.5*tabwidth), buttony, buttoncolor, highlight, alarmcolor, "Plateau Avg");
   view5 = new RectButton(sidebarMargin, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, " 5");
   view10 = new RectButton(sidebarMargin + buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "10");
   view20 = new RectButton(sidebarMargin + 2*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "20");
   view50 = new RectButton(sidebarMargin + 3*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "50");
   viewAll = new RectButton(sidebarMargin + 4*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "All");
   numPoints = 10;
-  view10.alert = true;
+  view10.alarm = true;
   currentView = peakTab;
   
   
@@ -282,20 +282,18 @@ void setup(){
 //    File dir = new File("/var/www/logs/perry");
 //    String[] foldernames = dir.list();
     
-    String[] foldernames = loadStrings(url + "logs/foldernames.txt");
-    println(foldernames);
     
-    //logfile = loadStrings("N97C_LOG.TXT");
-    directory = url + "logs/perry/" + foldernames[0] + "/SW48A" + filename;
-    logfile = loadStrings(directory);
-    println(directory);
+    String[] foldernames = loadStrings("foldernames.txt");
+ 
+    //String[] foldernames = splitTokens(foldernames2);
 
+//    directory = url + "logs/perry/" + foldernames[0] + "/SW48A" + filename;
+    directory = "logs/perry/" + foldernames[0] + "/SW48A" + filename;
+    logfile = loadStrings(directory);
     
-    println(logfile);
-    
-    for (int index = 1; index < foldernames.length; index++){
+    for (int index = 1; index < foldernames.length -1; index++){
       
-      directory = url + "/logs/perry/" + foldernames[index] + "/SW48A" + filename;
+      directory = "logs/perry/" + foldernames[index] + "/SW48A" + filename;
 
       logfiletemp = loadStrings(directory);
       
@@ -304,14 +302,14 @@ void setup(){
       }
       else{
         //splice(logfile,logfiletemp, 0);
+        
         logfile = concat(logfile,logfiletemp);
+        //println(logfiletemp);
        
       }
     }
   
-  
-  
-  
+    println("Imported " + logfile.length + " switch movement data logs");
   
 }
 
@@ -329,27 +327,13 @@ void draw(){
   view50.display();
   viewAll.display();
   
+  
   if(drawtag == 1){
-    
-    
-    
     fill(200);
     stroke(200);
     // color over the non-tab parts of the window
     rect(0,yaxislocation,width,height-yaxislocation);
     rect(0,0,xaxislocation-1,yaxislocation);
-    
-    
-
-
-    
-//    logfile = loadStrings("/home/ginman/Processing/loganalysis/web-export/N97C_LOG.TXT");
-//    if (logfile==null){
-//      println("File not loaded");
-//    }
-//    else{  
-//      println(logfile);
-//    }
     
     int loglength = logfile.length;
     int[] data = new int[loglength];
@@ -371,8 +355,9 @@ void draw(){
 //      for (int i=0; i < logfile.length; i++) {
 //        println(logfile[i]);
 //      }
-//
-//      println("Imported " + logfile.length + " switch movement data logs");
+
+
+      
   fill(255);
   stroke(0);
   // draw the graph outline
@@ -393,7 +378,7 @@ void draw(){
   // find points outside of the WL
   for(int index = 0; index < inputArray.length; index++){
     if(inputArray[index] > upperWarnValue || inputArray[index] < lowerWarnValue){
-     peakTab.alert = true;
+     peakTab.alarm = true;
     } 
   }
   
@@ -406,43 +391,42 @@ void draw(){
   // find points outside of the WL
   for(int index = 0; index < inputArray.length; index++){
     if(inputArray[index] > upperWarnValue || inputArray[index] < lowerWarnValue){
-     platavgTab.alert = true;
+     platavgTab.alarm = true;
     } 
   }
   */
   
-  peakTab.alert = alertFunction(peak, peakTab.lastViewNumber);
-  avgTab.alert = alertFunction(avg, avgTab.lastViewNumber);
-  platlenTab.alert = alertFunction(plattime, platlenTab.lastViewNumber);
-  platavgTab.alert = alertFunction(platavg, platavgTab.lastViewNumber);
-  
+  peakTab.alarm = alarmFunction(peak, peakTab.lastViewNumber);
+  avgTab.alarm = alarmFunction(avg, avgTab.lastViewNumber);
+  platlenTab.alarm = alarmFunction(plattime, platlenTab.lastViewNumber);
+  platavgTab.alarm = alarmFunction(platavg, platavgTab.lastViewNumber);
   
   currentView.lastViewNumber = numPoints;
+  println(currentView.buttonText);
   
-  
-//  println(peakTab.lastViewNumber);
-//  println(avgTab.lastViewNumber);
-//  println(platlenTab.lastViewNumber);
-//  println(platavgTab.lastViewNumber);
    if(currentView == peakTab ){
       arrayCopy(peak, peak.length - numPoints, graphArray, 0, numPoints);
       inputArray = peak;
+      println("1");
     }
     
    if(currentView == avgTab){
       arrayCopy(avg, avg.length - numPoints, graphArray, 0, numPoints);
       inputArray = avg;
+      println("2");
         
    }
    if(currentView == platlenTab){
      arrayCopy(plattime, plattime.length - numPoints, graphArray, 0, numPoints);
      inputArray = plattime;
+     println("3");
      
     }
    if(currentView == platavgTab){
      arrayCopy(platavg, platavg.length - numPoints, graphArray, 0, numPoints);
      inputArray = platavg;
-     platavgTab.alert = false;
+     platavgTab.alarm = false;
+     println("4");
     }
   
   float average = findAvg(inputArray);
@@ -453,7 +437,7 @@ void draw(){
 //  // find points outside of the WL
 //  for(int index = 0; index < inputArray.length; index++){
 //    if(inputArray[index] > upperWarnValue || inputArray[index] < lowerWarnValue){
-//     platavgTab.alert = true;
+//     platavgTab.alarm = true;
 //    } 
 //  }
   
@@ -599,8 +583,9 @@ void draw(){
   drawtag = 0;
   }
   if(updatebuttonpressed){
-    println("DING");
+    //println(updatebuttonpressed);
     updatebuttonpressed = false;
+    println(updateButton.over());
   }
   
   
@@ -634,7 +619,7 @@ float minVal(float[] testArray){
   return minimum; 
 }
 
-boolean alertFunction(float[] testArray, int testlastviewnumber){
+boolean alarmFunction(float[] testArray, int testlastviewnumber){
   float[] testInputArray = testArray;
   int viewNumber = testlastviewnumber;
   float average = findAvg(testInputArray);
