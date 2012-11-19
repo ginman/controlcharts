@@ -427,6 +427,8 @@ void draw(){
      inputArray = platavg;
      platavgTab.alarm = false;
      println("4");
+     println(mouseX);
+     println(mouseY);
     }
   
   float average = findAvg(inputArray);
