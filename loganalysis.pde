@@ -6,15 +6,22 @@ float xaxislocation = 0.05*windowsize+25;
 float axisscale = windowsize - 2*0.05*windowsize;
 int sidebarMargin;
 int buttony;
-float[] InputArray;
+float[] inputArray;
 int numPoints = 10;
-//String currentTab = "peak";
 
-    String[] logfile;
-    String[] logfiletemp;
-    String directory;
-    String filename = "/N48AC.TXT";
-    String url = "http://172.28.64.54/";  
+//String currentTab = "peak";
+String movementtype = "normal";
+
+String[] logfile;
+String[] logfiletemp;
+String directory;
+String filename = "/R48AC.TXT";
+String url = "http://172.28.64.54/";  
+
+// variables for point highlighting
+int pointhighlight; // index to be highlighted
+float[] xpoints; // pixel location of each plotted point on the current chart
+float[] ypoints; //
 
 
 boolean updatebuttonpressed = false;
@@ -32,7 +39,7 @@ RectButton view50;
 RectButton viewAll;
 
 class Button{
-  int x,y;
+  int q,r;
   int buttonHeight;
   int buttonWidth;
   String buttonText;
@@ -65,7 +72,7 @@ class Button{
   }
   
   boolean pressed(){
-    if(over){
+    if(overRect(q,r,buttonWidth, buttonHeight)){
       locked = true;
       return true;
     }
@@ -79,8 +86,8 @@ class Button{
     return true;
   }
   
-  boolean overRect(int x, int y, int buttonWidth, int buttonHeight){
-    if(mouseX >= x && mouseX <= x + buttonWidth && mouseY >= y && mouseY <= y+buttonHeight){
+  boolean overRect(int q, int r, int buttonWidth, int buttonHeight){
+    if(mouseX >= q && mouseX <= q + buttonWidth && mouseY >= r && mouseY <= r+buttonHeight){
       return true;
     }
     else{
@@ -92,8 +99,8 @@ class RectButton extends Button
 {
   RectButton(int ix, int iy, int iwidth, int iheight, color icolor, color ihighlight, color ialarm, String ibuttonText) 
   {
-    x = ix;
-    y = iy;
+    q = ix; // q and r are the top left corner of the button
+    r = iy;
     buttonText = ibuttonText;
     buttonWidth = iwidth;
     buttonHeight = iheight;
@@ -105,7 +112,7 @@ class RectButton extends Button
 
   boolean over() 
   {
-    if( overRect(x, y, buttonWidth, buttonHeight) ) {
+    if( overRect(q, r, buttonWidth, buttonHeight) ) {
       over = true;
       return true;
     } 
@@ -119,13 +126,13 @@ class RectButton extends Button
   {
     stroke(0);
     fill(currentcolor);
-    rect(x, y, buttonWidth, buttonHeight);
+    rect(q, r, buttonWidth, buttonHeight);
     fill(255);
-    text(buttonText, x + 5, y + .75*buttonHeight);
+    text(buttonText, q + 5, r + .75*buttonHeight);
   }
 }      
       
-void update(int x, int y)
+void update(int q, int r)
 {
   if(locked == false) {
     updateButton.update();
@@ -315,7 +322,7 @@ void setup(){
 
 void draw(){
   update(mouseX, mouseY);
-  updateButton.display();
+  updateButton.display(); // draw buttons and text
   peakTab.display();
   avgTab.display();
   platlenTab.display();
@@ -402,33 +409,25 @@ void draw(){
   platavgTab.alarm = alarmFunction(platavg, platavgTab.lastViewNumber);
   
   currentView.lastViewNumber = numPoints;
-  println(currentView.buttonText);
   
    if(currentView == peakTab ){
       arrayCopy(peak, peak.length - numPoints, graphArray, 0, numPoints);
       inputArray = peak;
-      println("1");
     }
     
    if(currentView == avgTab){
       arrayCopy(avg, avg.length - numPoints, graphArray, 0, numPoints);
       inputArray = avg;
-      println("2");
         
    }
    if(currentView == platlenTab){
      arrayCopy(plattime, plattime.length - numPoints, graphArray, 0, numPoints);
      inputArray = plattime;
-     println("3");
-     
     }
    if(currentView == platavgTab){
      arrayCopy(platavg, platavg.length - numPoints, graphArray, 0, numPoints);
      inputArray = platavg;
      platavgTab.alarm = false;
-     println("4");
-     println(mouseX);
-     println(mouseY);
     }
   
   float average = findAvg(inputArray);
@@ -567,7 +566,13 @@ void draw(){
   for(int index = 0; index < numPoints; index++){
     rectMode(CENTER);
     rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
+
+    
     rectMode(CORNER);
+    println(index);
+    xpoints[index] = xaxisdiv*index+xaxislocation;
+    ypoints[index] = height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation;
+    
 //    println("index = " + index);
 //    println("point = " + inputArray[index]);
 //    println("xpoint = " + xaxisdiv*index+xaxislocation);
@@ -581,6 +586,9 @@ void draw(){
   text("UWL = " + upperWarnValue, sidebarMargin, buttony*3.5);
   text("LWL = " + lowerWarnValue, sidebarMargin, buttony*4);
   text("# logs: " + inputArray.length, sidebarMargin, buttony*4.5);
+  text("Switch: 48A",sidebarMargin, buttony*5);
+  text("Move Type: ", sidebarMargin,buttony*5.5);
+  text(peakTab.currentcolor, sidebarMargin, buttony*6);
   
   drawtag = 0;
   }
