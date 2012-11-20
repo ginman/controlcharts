@@ -1,3 +1,17 @@
+// ******************************************************************************************
+// Loganalysis Control Chart Software
+// Designed by Peter Perreault
+//
+// The basic functionality of this code is to crawl through a directory structure of logs 
+// and import data from text files. Control charts are then generated based on this data, 
+// with upper and lower warning limits that are based on the standard deviation of the 
+// entire data set.
+// ******************************************************************************************
+
+
+// ******************************************************************************************
+// Global Variables
+// ******************************************************************************************
 int windowsize = 500;
 int fontsize = 14;
 int drawtag = 1;    
@@ -131,8 +145,13 @@ class RectButton extends Button
     text(buttonText, q + 5, r + .75*buttonHeight);
   }
 }      
+
+
+// ******************************************************************************************
+// Global Functions
+// ******************************************************************************************
       
-void update(int q, int r)
+void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse inputs
 {
   if(locked == false) {
     updateButton.update();
@@ -150,7 +169,23 @@ void update(int q, int r)
     locked = false;
   }
 
-  if(mousePressed) {
+  if(mousePressed) { 
+    // change the focus to the correct tab, turn off the alarm for that tab
+    // and redraw the chart. Or change the number of points being plotted
+    float[] xdiff = new float[numPoints]; // difference between mouseX and xpoints
+    float[] ydiff = new float[numPoints];
+    float[] mindist = new float[numPoints];
+    float[] xpoints = ixpoints;
+    
+    for(int index = 0; index < numPoints; index++){
+      println(xpoints[index]);
+      xdiff[index] = abs(mouseX - ixpoints[index]);  
+      ydiff[index] = abs(mouseY - iypoints[index]); 
+      mindist[index] = xdiff[index] + ydiff[index];
+    }
+    
+    pointhighlight = minIndex(mindist);
+    
     if(updateButton.pressed()) {
       updatebuttonpressed = true;
       peakTab.alarm = false;
@@ -244,6 +279,9 @@ void update(int q, int r)
   }
 }      
 
+// ******************************************************************************************
+// Setup
+// ******************************************************************************************
 
 void setup(){
   size(650, 500, JAVA2D);
@@ -251,15 +289,18 @@ void setup(){
   f = loadFont("Dialog.plain-48.vlw");
   textFont(f,fontsize);
   
-  
+  // Set the colors for the tabs
   color buttoncolor = color(153);
   color highlight = color(100);
   color alarmcolor = color(185, 0, 0);
-  //create update button
+  
+
   sidebarMargin = (int)round(1.5*xaxislocation + axisscale); 
   buttony = (int)round(yaxislocation);
-  int tabwidth = 3*buttony;
-  // String updateButtonText = "Update";
+  int tabwidth = 3*buttony; // set the width of the top tabs
+
+  
+  // Create the buttons
   updateButton = new RectButton(sidebarMargin, buttony, 3*buttony, buttony, buttoncolor, highlight, alarmcolor, "Update"); 
   peakTab = new RectButton(round(xaxislocation), 0, tabwidth, buttony, buttoncolor, highlight, alarmcolor, "Peak");
   avgTab = new RectButton(round(xaxislocation)+tabwidth, 0 , tabwidth, buttony, buttoncolor, highlight, alarmcolor, "Average");
@@ -320,8 +361,12 @@ void setup(){
   
 }
 
+
+// ******************************************************************************************
+// Draw
+// ******************************************************************************************
 void draw(){
-  update(mouseX, mouseY);
+//  update(mouseX, mouseY);
   updateButton.display(); // draw buttons and text
   peakTab.display();
   avgTab.display();
@@ -446,9 +491,6 @@ void draw(){
   float arrayMax = maxVal(graphArray);
   float arrayMin = minVal(graphArray);
   
-  
-  
-  
   // if the warning lines are outside the range of the graph, rework the range to include the warning lines
   float yaxismin = min(arrayMin,lowerWarnValue);
   float yaxismax = max(arrayMax,upperWarnValue);
@@ -490,10 +532,7 @@ void draw(){
       //plot the 1/2 mark
       line(xaxislocation - 3, divpoint+divlen/2, xaxislocation + 3, divpoint+divlen/2);
       */
-      
-      
-      
-      
+     
       if( yaxismax - index > 10){
         offset = 32;
       }
@@ -562,14 +601,17 @@ void draw(){
   
   fill(255);
   stroke(0);
-  // plot the points
+  
+  float[] xpoints = new float[numPoints];
+  float[] ypoints = new float[numPoints];
+  
+// ******************************************************************************************
+// Plot the Points
+// ******************************************************************************************
   for(int index = 0; index < numPoints; index++){
     rectMode(CENTER);
     rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
-
-    
     rectMode(CORNER);
-    println(index);
     xpoints[index] = xaxisdiv*index+xaxislocation;
     ypoints[index] = height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation;
     
@@ -578,6 +620,8 @@ void draw(){
 //    println("xpoint = " + xaxisdiv*index+xaxislocation);
 //    println("ypoint = " + axisscale*(inputArray[index] - yaxismin)/range);  
   }
+  println(xpoints);
+  println(ypoints);
   
   // sidebar output
   fill(0);
@@ -598,8 +642,14 @@ void draw(){
     println(updateButton.over());
   }
   
+
+  update(mouseX, mouseY, xpoints, ypoints);
   
 }  
+
+// ******************************************************************************************
+// Other Functions
+// ******************************************************************************************
 
 float findSD(float[] testArray, float testAvg){
   float[] standardDeviationArray = new float[testArray.length];
@@ -652,10 +702,22 @@ float maxVal(float[] testArray){
   for(int i = 1; i < testArray.length; i++){
     if (testArray[i] > maximum){
       maximum = testArray[i];
+
     }
     
   }
-  return maximum; 
+  return maximum;
 }
 
-
+int minIndex(float[] testArray){
+  float minimum = testArray[0];
+  int minind = 0;
+  for(int i = 1; i < testArray.length; i++){
+    if (testArray[i] < minimum){
+      minimum = testArray[i];
+      minind = i;
+    }
+    
+  }
+  return minind;
+}
