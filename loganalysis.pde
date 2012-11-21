@@ -22,6 +22,7 @@ int sidebarMargin;
 int buttony;
 float[] inputArray;
 int numPoints = 10;
+int maxPoints = 5000;
 
 //String currentTab = "peak";
 String movementtype = "normal";
@@ -33,9 +34,9 @@ String filename = "/R48AC.TXT";
 String url = "http://172.28.64.54/";  
 
 // variables for point highlighting
-int pointhighlight; // index to be highlighted
-float[] xpoints; // pixel location of each plotted point on the current chart
-float[] ypoints; //
+int pointhighlight = -1; // index to be highlighted
+float[] xpoints = new float[maxPoints]; // pixel location of each plotted point on the current chart
+float[] ypoints = new float[maxPoints]; //
 
 
 boolean updatebuttonpressed = false;
@@ -153,6 +154,8 @@ class RectButton extends Button
       
 void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse inputs
 {
+  
+  
   if(locked == false) {
     updateButton.update();
     peakTab.update();
@@ -170,21 +173,30 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
   }
 
   if(mousePressed) { 
+    if(ixpoints[0] != 0.0){
+      
     // change the focus to the correct tab, turn off the alarm for that tab
     // and redraw the chart. Or change the number of points being plotted
     float[] xdiff = new float[numPoints]; // difference between mouseX and xpoints
     float[] ydiff = new float[numPoints];
     float[] mindist = new float[numPoints];
-    float[] xpoints = ixpoints;
+    float[] xpoints = new float[numPoints];
+    xpoints = ixpoints;
     
     for(int index = 0; index < numPoints; index++){
-      println(xpoints[index]);
-      xdiff[index] = abs(mouseX - ixpoints[index]);  
-      ydiff[index] = abs(mouseY - iypoints[index]); 
+      //println(xpoints[index]);
+      xdiff[index] = abs(q - xpoints[index]);  
+      ydiff[index] = abs(r - iypoints[index]); 
       mindist[index] = xdiff[index] + ydiff[index];
     }
+    //println(xdiff);
+    if(minVal(mindist) <= 5){
+      pointhighlight = minIndex(mindist);
+      drawtag = 1;
+    }
     
-    pointhighlight = minIndex(mindist);
+
+    }
     
     if(updateButton.pressed()) {
       updatebuttonpressed = true;
@@ -366,6 +378,10 @@ void setup(){
 // Draw
 // ******************************************************************************************
 void draw(){
+  
+//  float[] xpoints = new float[numPoints];
+//  float[] ypoints = new float[numPoints];
+  
 //  update(mouseX, mouseY);
   updateButton.display(); // draw buttons and text
   peakTab.display();
@@ -379,8 +395,13 @@ void draw(){
   view50.display();
   viewAll.display();
   
+
   
   if(drawtag == 1){
+    
+    //float[] xpoints = new float[numPoints];
+    //float[] ypoints = new float[numPoints];
+    
     fill(200);
     stroke(200);
     // color over the non-tab parts of the window
@@ -503,15 +524,6 @@ void draw(){
   range = yaxismax - yaxismin;
   float xaxisdiv = axisscale/graphArray.length;
   
-  /*
-  println("maxpeak = " + arrayMax + ", minpeak = " + arrayMin + ", divlen = " + divlen); 
-  println("xaxisdiv = " + xaxisdiv);
-  println("yaxismin = " + yaxismin);
-  println("yaxismax = " + yaxismax);
-  println("axisscale = " + axisscale);
-  println("range = " + range);
-  */
-  
   fill(0);
   int offset = 0;
   if (range < 3){ // for a smaller range do not find the integers
@@ -599,40 +611,52 @@ void draw(){
   // create and plot the x axis divisions
 //  for(int index = 0; index <= peak.length; index++){ 
   
-  fill(255);
-  stroke(0);
+
   
-  float[] xpoints = new float[numPoints];
-  float[] ypoints = new float[numPoints];
+
   
 // ******************************************************************************************
 // Plot the Points
 // ******************************************************************************************
-  for(int index = 0; index < numPoints; index++){
-    rectMode(CENTER);
-    rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
-    rectMode(CORNER);
-    xpoints[index] = xaxisdiv*index+xaxislocation;
-    ypoints[index] = height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation;
-    
-//    println("index = " + index);
-//    println("point = " + inputArray[index]);
-//    println("xpoint = " + xaxisdiv*index+xaxislocation);
-//    println("ypoint = " + axisscale*(inputArray[index] - yaxismin)/range);  
-  }
-  println(xpoints);
-  println(ypoints);
+
+  fill(255);
+  stroke(0);
+  rectMode(CENTER);
   
-  // sidebar output
+  for(int index = 0; index < numPoints; index++){
+   
+    if(index == pointhighlight){
+      stroke(185, 0, 0);
+      fill(0);
+      rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
+      stroke(0);
+      fill(255);
+    }
+    else{
+      rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
+    }
+    
+    xpoints[index] = xaxisdiv*index+xaxislocation;
+    ypoints[index] = height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation; 
+  }
+  
+  rectMode(CORNER);
+// ******************************************************************************************
+// Sidebar Output
+// ******************************************************************************************
   fill(0);
   text("SD = " + standardDeviation, sidebarMargin, buttony*2.5);
   text("avg = " + average, sidebarMargin, buttony*3);
   text("UWL = " + upperWarnValue, sidebarMargin, buttony*3.5);
   text("LWL = " + lowerWarnValue, sidebarMargin, buttony*4);
   text("# logs: " + inputArray.length, sidebarMargin, buttony*4.5);
-  text("Switch: 48A",sidebarMargin, buttony*5);
-  text("Move Type: ", sidebarMargin,buttony*5.5);
-  text(peakTab.currentcolor, sidebarMargin, buttony*6);
+  if(pointhighlight != -1){
+  text("Y Val:"+ ypoints[pointhighlight],sidebarMargin, buttony*5);
+  text("Peak: "+peak[pointhighlight], sidebarMargin,buttony*5.5);
+  text("Avg: "+avg[pointhighlight], sidebarMargin,buttony*6);
+  text("Plattime: "+plattime[pointhighlight], sidebarMargin,buttony*6.5);
+  text("Platavg: "+platavg[pointhighlight], sidebarMargin,buttony*7);
+  }
   
   drawtag = 0;
   }
@@ -641,9 +665,10 @@ void draw(){
     updatebuttonpressed = false;
     println(updateButton.over());
   }
-  
-
+  //println(xpoints);
   update(mouseX, mouseY, xpoints, ypoints);
+
+  
   
 }  
 
