@@ -205,6 +205,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.alarm = false;
       platavgTab.alarm = false;
       drawtag = 1;
+      println("Reloading log files");
+      setup();
     } 
     if(peakTab.pressed()){
       peakTab.focus = true;
@@ -306,7 +308,6 @@ void setup(){
   color highlight = color(100);
   color alarmcolor = color(185, 0, 0);
   
-
   sidebarMargin = (int)round(1.5*xaxislocation + axisscale); 
   buttony = (int)round(yaxislocation);
   int tabwidth = 3*buttony; // set the width of the top tabs
@@ -351,11 +352,27 @@ void setup(){
     directory = "logs/perry/" + foldernames[0] + "/SW48A" + filename;
     logfile = loadStrings(directory);
     
+    for (int j = 0; j < logfile.length; j++){
+      logfile[j] = concat(foldernames[0] + ", ", logfile[j]);
+    }
+    
     for (int index = 1; index < foldernames.length -1; index++){
       
       directory = "logs/perry/" + foldernames[index] + "/SW48A" + filename;
 
       logfiletemp = loadStrings(directory);
+      //println(logfiletemp[0]);
+      
+      
+      for (int j = 0; j < logfiletemp.length; j++){
+        logfiletemp[j] = concat(foldernames[index] + ", ", logfiletemp[j]);
+      }
+      
+      /*
+      for (int j = 0; j < logfiletemp.length-1; j++){
+      println(logfiletemp[j]);
+      }
+      */
       
       if (logfiletemp==null){
         println("No templog file found");
@@ -364,12 +381,13 @@ void setup(){
         //splice(logfile,logfiletemp, 0);
         
         logfile = concat(logfile,logfiletemp);
-        //println(logfiletemp);
+        //println(logfile);
        
       }
     }
   
-    println("Imported " + logfile.length + " switch movement data logs");
+    println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length -2]);
+    println();
   
 }
 
@@ -411,6 +429,7 @@ void draw(){
     int loglength = logfile.length;
     int[] data = new int[loglength];
     String[] timestamp = new String[loglength];
+    String[] datestamp = new String[loglength];
     float[] platavg = new float[loglength];
     float[] peak = new float[loglength];
     float[] plattime = new float[loglength];
@@ -418,16 +437,19 @@ void draw(){
     
     for (int index = 0; index < logfile.length; index++) {
       String[] currentlog = split(logfile[index],',');
-      timestamp[index] = currentlog[0];
-      platavg[index] = float(currentlog[4]);
-      peak[index] = float(currentlog[1]);
-      plattime[index] = 0.02*float(currentlog[3]);
-      avg[index] = float(currentlog[2]);
+      datestamp[index]= currentlog[0];
+      timestamp[index] = currentlog[1];
+      platavg[index] = float(currentlog[5]);
+      peak[index] = float(currentlog[2]);
+      plattime[index] = 0.02*float(currentlog[4]);
+      avg[index] = float(currentlog[3]);
     }
 
-//      for (int i=0; i < logfile.length; i++) {
-//        println(logfile[i]);
-//      }
+//println(datestamp);
+
+//     for (int i=0; i < logfile.length; i++) {
+//       println(logfile[i]);
+//     }
 
 
       
@@ -656,15 +678,22 @@ void draw(){
   text("Avg: "+avg[pointhighlight], sidebarMargin,buttony*6);
   text("Plattime: "+plattime[pointhighlight], sidebarMargin,buttony*6.5);
   text("Platavg: "+platavg[pointhighlight], sidebarMargin,buttony*7);
+  text("Time: " +timestamp[pointhighlight],sidebarMargin, buttony*7.5);
+  text("Date: " +datestamp[pointhighlight],sidebarMargin, buttony*8);
   }
   
   drawtag = 0;
   }
+/*
   if(updatebuttonpressed){
     //println(updatebuttonpressed);
     updatebuttonpressed = false;
     println(updateButton.over());
+    setup();
+    drawtag = 1;
   }
+*/  
+  
   //println(xpoints);
   update(mouseX, mouseY, xpoints, ypoints);
 
