@@ -6,6 +6,9 @@
 // and import data from text files. Control charts are then generated based on this data, 
 // with upper and lower warning limits that are based on the standard deviation of the 
 // entire data set.
+//
+// Things to change:
+//  * Make timing constant a variable
 // ******************************************************************************************
 
 
@@ -30,7 +33,7 @@ String movementtype = "normal";
 String[] logfile;
 String[] logfiletemp;
 String directory;
-String filename = "/R48AC.TXT";
+String filename = "/N48AC.TXT";
 String url = "http://172.28.64.54/";  
 
 // variables for point highlighting
@@ -52,6 +55,7 @@ RectButton view10;
 RectButton view20;
 RectButton view50;
 RectButton viewAll;
+RectButton direction;
 
 class Button{
   int q,r;
@@ -70,11 +74,11 @@ class Button{
     
     if(alarm){
       currentcolor = alarmcolor;
-      if(over()){
+      if(overRect(q,r,buttonWidth, buttonHeight)){
       currentcolor = highlightcolor;
       }
     }
-    else if(over()){
+    else if(overRect(q,r,buttonWidth, buttonHeight)){
       currentcolor = highlightcolor;
     } 
     
@@ -157,6 +161,7 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
   
   
   if(locked == false) {
+    direction.update();
     updateButton.update();
     peakTab.update();
     avgTab.update();
@@ -206,7 +211,23 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platavgTab.alarm = false;
       drawtag = 1;
       println("Reloading log files");
-      setup();
+      importData();
+    } 
+    if(direction.pressed()) {
+      drawtag = 1;
+      if(direction.buttonText == "Normal"){
+        direction.buttonText = "Reverse";
+        filename = "/R48AC.TXT";
+        
+      }
+      else{
+        direction.buttonText = "Normal";
+        filename = "/N48AC.TXT";
+      }
+      println("Now displaying " + direction.buttonText + " movements.");
+      direction.display();
+      importData();
+      
     } 
     if(peakTab.pressed()){
       peakTab.focus = true;
@@ -293,6 +314,46 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
   }
 }      
 
+void importData(){
+    String[] foldernames = loadStrings("foldernames.txt");
+//    directory = url + "logs/perry/" + foldernames[0] + "/SW48A" + filename;
+    directory = "logs/perry/" + foldernames[0] + "/SW48A" + filename;
+    logfile = loadStrings(directory);
+    
+    for (int j = 0; j < logfile.length; j++){
+      logfile[j] = concat(foldernames[0] + ", ", logfile[j]);
+    }
+    
+    for (int index = 1; index < foldernames.length -1; index++){
+      
+      directory = "logs/perry/" + foldernames[index] + "/SW48A" + filename;
+
+      logfiletemp = loadStrings(directory);
+      //println(logfiletemp[0]);
+      
+      
+      for (int j = 0; j < logfiletemp.length; j++){
+        logfiletemp[j] = concat(foldernames[index] + ", ", logfiletemp[j]);
+      }
+      
+      if (logfiletemp==null){
+        println("No templog file found");
+      }
+      else{
+        //splice(logfile,logfiletemp, 0);
+        
+        logfile = concat(logfile,logfiletemp);
+        //println(logfile);
+       
+      }
+    }
+  
+    println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length -2]);
+  
+}
+
+
+
 // ******************************************************************************************
 // Setup
 // ******************************************************************************************
@@ -314,6 +375,7 @@ void setup(){
 
   
   // Create the buttons
+  // RectButton(x, y, width, height, default c, highlight c, alarm c, text)
   updateButton = new RectButton(sidebarMargin, buttony, 3*buttony, buttony, buttoncolor, highlight, alarmcolor, "Update"); 
   peakTab = new RectButton(round(xaxislocation), 0, tabwidth, buttony, buttoncolor, highlight, alarmcolor, "Peak");
   avgTab = new RectButton(round(xaxislocation)+tabwidth, 0 , tabwidth, buttony, buttoncolor, highlight, alarmcolor, "Average");
@@ -324,10 +386,13 @@ void setup(){
   view20 = new RectButton(sidebarMargin + 2*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "20");
   view50 = new RectButton(sidebarMargin + 3*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "50");
   viewAll = new RectButton(sidebarMargin + 4*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "All");
-  numPoints = 10;
-  view10.alarm = true;
-  currentView = peakTab;
-  
+  direction = new RectButton(round(xaxislocation), height-buttony, 3*buttony, buttony, buttoncolor, highlight, alarmcolor, "Normal");
+  numPoints = 5000;
+  viewAll.alarm = true;
+  if(currentView == null){
+    currentView = peakTab;
+  }
+  importData();
   
   // IMPORT DATA FROM THE LOG FILES
     
@@ -343,7 +408,7 @@ void setup(){
 //    File dir = new File("/var/www/logs/perry");
 //    String[] foldernames = dir.list();
     
-    
+    /*
     String[] foldernames = loadStrings("foldernames.txt");
  
     //String[] foldernames = splitTokens(foldernames2);
@@ -368,12 +433,6 @@ void setup(){
         logfiletemp[j] = concat(foldernames[index] + ", ", logfiletemp[j]);
       }
       
-      /*
-      for (int j = 0; j < logfiletemp.length-1; j++){
-      println(logfiletemp[j]);
-      }
-      */
-      
       if (logfiletemp==null){
         println("No templog file found");
       }
@@ -387,8 +446,8 @@ void setup(){
     }
   
     println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length -2]);
-    println();
-  
+    println(currentView.buttonText);
+    */
 }
 
 
@@ -412,10 +471,11 @@ void draw(){
   view20.display();
   view50.display();
   viewAll.display();
-  
-
+  direction.display();
   
   if(drawtag == 1){
+    
+    //currentView.currentcolor = highlightcolor;
     
     //float[] xpoints = new float[numPoints];
     //float[] ypoints = new float[numPoints];
@@ -667,19 +727,20 @@ void draw(){
 // Sidebar Output
 // ******************************************************************************************
   fill(0);
-  text("SD = " + standardDeviation, sidebarMargin, buttony*2.5);
-  text("avg = " + average, sidebarMargin, buttony*3);
-  text("UWL = " + upperWarnValue, sidebarMargin, buttony*3.5);
-  text("LWL = " + lowerWarnValue, sidebarMargin, buttony*4);
-  text("# logs: " + inputArray.length, sidebarMargin, buttony*4.5);
+  //text("SD = " + standardDeviation, sidebarMargin, buttony*2.5);
+  //text("avg = " + average, sidebarMargin, buttony*3);
+  //text("UWL = " + upperWarnValue, sidebarMargin, buttony*3.5);
+  //text("LWL = " + lowerWarnValue, sidebarMargin, buttony*4);
+  //text("# logs: " + inputArray.length, sidebarMargin, buttony*4.5);
   if(pointhighlight != -1){
-  text("Y Val:"+ ypoints[pointhighlight],sidebarMargin, buttony*5);
-  text("Peak: "+peak[pointhighlight], sidebarMargin,buttony*5.5);
-  text("Avg: "+avg[pointhighlight], sidebarMargin,buttony*6);
-  text("Plattime: "+plattime[pointhighlight], sidebarMargin,buttony*6.5);
-  text("Platavg: "+platavg[pointhighlight], sidebarMargin,buttony*7);
-  text("Time: " +timestamp[pointhighlight],sidebarMargin, buttony*7.5);
-  text("Date: " +datestamp[pointhighlight],sidebarMargin, buttony*8);
+  //text("Y Val: "+ ypoints[pointhighlight],sidebarMargin, buttony*2.5);
+  text("Peak: "+peak[pointhighlight], sidebarMargin,buttony*3);
+  text("Avg: "+avg[pointhighlight], sidebarMargin,buttony*3.5);
+  text("Plattime: "+plattime[pointhighlight], sidebarMargin,buttony*4);
+  text("Platavg: "+platavg[pointhighlight], sidebarMargin,buttony*4.5);
+  text("Date: " +datestamp[pointhighlight],sidebarMargin, buttony*5);
+  text("Time: " +timestamp[pointhighlight],sidebarMargin, buttony*5.5);
+
   }
   
   drawtag = 0;
