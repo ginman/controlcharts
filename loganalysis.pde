@@ -31,7 +31,10 @@ int maxPoints = 5000;
 String movementtype = "normal";
 
 String[] logfile;
+String[] logwaveform;
 String[] logfiletemp;
+String[] timestamp;
+String[] datestamp;
 String directory;
 String filename = "/N48AC.TXT";
 String url = "http://172.28.64.54/";  
@@ -161,6 +164,7 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
   
   
   if(locked == false) {
+    waveform.update();
     direction.update();
     updateButton.update();
     peakTab.update();
@@ -178,29 +182,28 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
   }
 
   if(mousePressed) { 
-    if(ixpoints[0] != 0.0){
+      if(ixpoints[0] != 0.0){
+        
+      // change the focus to the correct tab, turn off the alarm for that tab
+      // and redraw the chart. Or change the number of points being plotted
+      float[] xdiff = new float[numPoints]; // difference between mouseX and xpoints
+      float[] ydiff = new float[numPoints];
+      float[] mindist = new float[numPoints];
+      float[] xpoints = new float[numPoints];
+      xpoints = ixpoints;
       
-    // change the focus to the correct tab, turn off the alarm for that tab
-    // and redraw the chart. Or change the number of points being plotted
-    float[] xdiff = new float[numPoints]; // difference between mouseX and xpoints
-    float[] ydiff = new float[numPoints];
-    float[] mindist = new float[numPoints];
-    float[] xpoints = new float[numPoints];
-    xpoints = ixpoints;
-    
-    for(int index = 0; index < numPoints; index++){
-      //println(xpoints[index]);
-      xdiff[index] = abs(q - xpoints[index]);  
-      ydiff[index] = abs(r - iypoints[index]); 
-      mindist[index] = xdiff[index] + ydiff[index];
-    }
-    //println(xdiff);
-    if(minVal(mindist) <= 5){
-      pointhighlight = minIndex(mindist);
-      drawtag = 1;
-    }
-    
-
+      for(int index = 0; index < numPoints; index++){
+        //println(xpoints[index]);
+        xdiff[index] = abs(q - xpoints[index]);  
+        ydiff[index] = abs(r - iypoints[index]); 
+        mindist[index] = xdiff[index] + ydiff[index];
+      }
+      //println(xdiff);
+      if(minVal(mindist) <= 5){
+        pointhighlight = minIndex(mindist);
+        //drawtag = 1;
+        plot();
+      }
     }
     
     if(updateButton.pressed()) {
@@ -209,16 +212,17 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       avgTab.alarm = false;
       platlenTab.alarm = false;
       platavgTab.alarm = false;
-      drawtag = 1;
+      //drawtag = 1;
       println("Reloading log files");
       importData();
+      plot();
+      //pointhighlight = -1;
     } 
     if(direction.pressed()) {
-      drawtag = 1;
+      //drawtag = 1;
       if(direction.buttonText == "Normal"){
         direction.buttonText = "Reverse";
         filename = "/R48AC.TXT";
-        
       }
       else{
         direction.buttonText = "Normal";
@@ -227,15 +231,24 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       println("Now displaying " + direction.buttonText + " movements.");
       direction.display();
       importData();
-      
+      plot();
     } 
+    if(waveform.pressed()){
+      println(trim(datestamp[pointhighlight]));
+      println(trim(timestamp[pointhighlight]));
+      timestamptemp = trim(timestamp[pointhighlight]);
+      timestamptemp = timestamptemp.substring(0,2) + timestamptemp.substring(3,5) + timestamptemp.substring(6,8);
+      logwaveform = loadStrings("logs/perry/" + trim(datestamp[pointhighlight]) + "/SW48A/" + timestamptemp + "N.TXT"); 
+      plot();
+    }
     if(peakTab.pressed()){
       peakTab.focus = true;
       avgTab.focus = false;
       platlenTab.focus = false;
       platavgTab.focus = false;
       currentView = peakTab;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       peakTab.alarm = false;
     }
     if(avgTab.pressed()){
@@ -244,7 +257,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.focus = false;
       platavgTab.focus = false;
       currentView = avgTab;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       avgTab.alarm = false;
     }
     if(platlenTab.pressed()){
@@ -253,7 +267,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.focus = true;
       platavgTab.focus = false;
       currentView = platlenTab;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       platlenTab.alarm = false;
     }
     if(platavgTab.pressed()){
@@ -263,12 +278,14 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.focus = false;
       
       currentView = platavgTab;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       platavgTab.alarm = false;
     }
     if(view5.pressed()){
       numPoints = 5;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       view5.alarm = true;
       view10.alarm = false;
       view20.alarm = false;
@@ -277,7 +294,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
     if(view10.pressed()){
       numPoints = 10;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       view10.alarm = true;
       view5.alarm = false;
       view20.alarm = false;
@@ -286,7 +304,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
     if(view20.pressed()){
       numPoints = 20;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       view20.alarm = true;
       view5.alarm = false;
       view10.alarm = false;
@@ -295,7 +314,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
      if(view50.pressed()){
       numPoints = 50;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       view50.alarm = true;
       view5.alarm = false;
       view10.alarm = false;
@@ -304,7 +324,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
      if(viewAll.pressed()){
       numPoints = 2000;
-      drawtag = 1;
+      //drawtag = 1;
+      plot();
       viewAll.alarm = true;
       view5.alarm = false;
       view10.alarm = false;
@@ -324,7 +345,7 @@ void importData(){
       logfile[j] = concat(foldernames[0] + ", ", logfile[j]);
     }
     
-    for (int index = 1; index < foldernames.length -1; index++){
+    for (int index = 1; index < foldernames.length; index++){
       
       directory = "logs/perry/" + foldernames[index] + "/SW48A" + filename;
 
@@ -348,7 +369,7 @@ void importData(){
       }
     }
   
-    println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length -2]);
+    println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length - 1]);
   
 }
 
@@ -387,13 +408,14 @@ void setup(){
   view50 = new RectButton(sidebarMargin + 3*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "50");
   viewAll = new RectButton(sidebarMargin + 4*buttony, height - buttony, buttony, buttony, buttoncolor, highlight, highlight, "All");
   direction = new RectButton(round(xaxislocation), height-buttony, 3*buttony, buttony, buttoncolor, highlight, alarmcolor, "Normal");
+  waveform = new RectButton(sidebarMargin, buttony*6.5, 3*buttony, buttony, buttoncolor, highlight, alarmcolor, "Waveform");
   numPoints = 5000;
   viewAll.alarm = true;
   if(currentView == null){
     currentView = peakTab;
   }
   importData();
-  
+  plot();
   // IMPORT DATA FROM THE LOG FILES
     
 //    // import the data from the log file
@@ -473,7 +495,16 @@ void draw(){
   viewAll.display();
   direction.display();
   
-  if(drawtag == 1){
+  if(pointhighlight != -1){
+    waveform.display();
+  }
+  
+  update(mouseX, mouseY, xpoints, ypoints);
+  //plot();
+} 
+
+void plot(){
+    //  if(drawtag == 1){
     
     //currentView.currentcolor = highlightcolor;
     
@@ -488,13 +519,16 @@ void draw(){
     
     int loglength = logfile.length;
     int[] data = new int[loglength];
-    String[] timestamp = new String[loglength];
-    String[] datestamp = new String[loglength];
+    String[] timestamptemp = new String[loglength];
+    String[] datestamptemp = new String[loglength];
+    timestamp = timestamptemp;
+    datestamp = datestamptemp;
     float[] platavg = new float[loglength];
     float[] peak = new float[loglength];
     float[] plattime = new float[loglength];
     float[] avg = new float[loglength];
     
+    // split the logfile into separate arrays
     for (int index = 0; index < logfile.length; index++) {
       String[] currentlog = split(logfile[index],',');
       datestamp[index]= currentlog[0];
@@ -504,14 +538,6 @@ void draw(){
       plattime[index] = 0.02*float(currentlog[4]);
       avg[index] = float(currentlog[3]);
     }
-
-//println(datestamp);
-
-//     for (int i=0; i < logfile.length; i++) {
-//       println(logfile[i]);
-//     }
-
-
       
   fill(255);
   stroke(0);
@@ -522,35 +548,8 @@ void draw(){
   
   float[] inputArray = new float[numPoints];
   float[] graphArray = new float[numPoints];
-  /*
-  // cycle through each array, find if any have points outside of the warn limits
-  inputArray = peak;
-  float average = findAvg(inputArray);
-  float standardDeviation = findSD(inputArray, average);
-  float upperWarnValue = average+2*standardDeviation;
-  float lowerWarnValue = average-2*standardDeviation;
   
-  // find points outside of the WL
-  for(int index = 0; index < inputArray.length; index++){
-    if(inputArray[index] > upperWarnValue || inputArray[index] < lowerWarnValue){
-     peakTab.alarm = true;
-    } 
-  }
-  
-  inputArray = platavg;
-  average = findAvg(inputArray);
-  standardDeviation = findSD(inputArray, average);
-  upperWarnValue = average+2*standardDeviation;
-  lowerWarnValue = average-2*standardDeviation;
-  
-  // find points outside of the WL
-  for(int index = 0; index < inputArray.length; index++){
-    if(inputArray[index] > upperWarnValue || inputArray[index] < lowerWarnValue){
-     platavgTab.alarm = true;
-    } 
-  }
-  */
-  
+  // find if an alarm must be set
   peakTab.alarm = alarmFunction(peak, peakTab.lastViewNumber);
   avgTab.alarm = alarmFunction(avg, avgTab.lastViewNumber);
   platlenTab.alarm = alarmFunction(plattime, platlenTab.lastViewNumber);
@@ -558,6 +557,7 @@ void draw(){
   
   currentView.lastViewNumber = numPoints;
   
+  // copy the correct array to be plotted
    if(currentView == peakTab ){
       arrayCopy(peak, peak.length - numPoints, graphArray, 0, numPoints);
       inputArray = peak;
@@ -582,13 +582,6 @@ void draw(){
   float standardDeviation = findSD(inputArray, average);
   float upperWarnValue = average+2*standardDeviation;
   float lowerWarnValue = average-2*standardDeviation;
-  
-//  // find points outside of the WL
-//  for(int index = 0; index < inputArray.length; index++){
-//    if(inputArray[index] > upperWarnValue || inputArray[index] < lowerWarnValue){
-//     platavgTab.alarm = true;
-//    } 
-//  }
   
   // find the max value in the array to calibrate the axis
   float arrayMax = maxVal(graphArray);
@@ -687,16 +680,7 @@ void draw(){
   stroke(230,0,0);
   line(xaxislocation, upperWarnLine, xaxislocation + axisscale, upperWarnLine); 
   line(xaxislocation, lowerWarnLine, xaxislocation + axisscale, lowerWarnLine);
-  //println("SD = " + standardDeviation);
-  //println("avg = " + average);
-  
-  // create and plot the x axis divisions
-//  for(int index = 0; index <= peak.length; index++){ 
-  
-
-  
-
-  
+ 
 // ******************************************************************************************
 // Plot the Points
 // ******************************************************************************************
@@ -744,7 +728,7 @@ void draw(){
   }
   
   drawtag = 0;
-  }
+}
 /*
   if(updatebuttonpressed){
     //println(updatebuttonpressed);
@@ -756,11 +740,9 @@ void draw(){
 */  
   
   //println(xpoints);
-  update(mouseX, mouseY, xpoints, ypoints);
+
 
   
-  
-}  
 
 // ******************************************************************************************
 // Other Functions
