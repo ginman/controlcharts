@@ -26,6 +26,7 @@ int buttony;
 float[] inputArray;
 int numPoints = 10;
 int maxPoints = 5000;
+int numdays;
 
 //String currentTab = "peak";
 String movementtype = "normal";
@@ -44,7 +45,6 @@ int pointhighlight = -1; // index to be highlighted
 float[] xpoints = new float[maxPoints]; // pixel location of each plotted point on the current chart
 float[] ypoints = new float[maxPoints]; //
 
-
 boolean updatebuttonpressed = false;
 boolean locked = false;
 RectButton updateButton; 
@@ -59,6 +59,7 @@ RectButton view20;
 RectButton view50;
 RectButton viewAll;
 RectButton direction;
+RectButton waveform;
 
 class Button{
   int q,r;
@@ -234,8 +235,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       plot();
     } 
     if(waveform.pressed()){
-      println(trim(datestamp[pointhighlight]));
-      println(trim(timestamp[pointhighlight]));
       timestamptemp = trim(timestamp[pointhighlight]);
       timestamptemp = timestamptemp.substring(0,2) + timestamptemp.substring(3,5) + timestamptemp.substring(6,8);
       logwaveform = loadStrings("logs/perry/" + trim(datestamp[pointhighlight]) + "/SW48A/" + timestamptemp + "N.TXT"); 
@@ -247,7 +246,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.focus = false;
       platavgTab.focus = false;
       currentView = peakTab;
-      //drawtag = 1;
       plot();
       peakTab.alarm = false;
     }
@@ -257,7 +255,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.focus = false;
       platavgTab.focus = false;
       currentView = avgTab;
-      //drawtag = 1;
       plot();
       avgTab.alarm = false;
     }
@@ -267,7 +264,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.focus = true;
       platavgTab.focus = false;
       currentView = platlenTab;
-      //drawtag = 1;
       plot();
       platlenTab.alarm = false;
     }
@@ -278,13 +274,11 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       platlenTab.focus = false;
       
       currentView = platavgTab;
-      //drawtag = 1;
       plot();
       platavgTab.alarm = false;
     }
     if(view5.pressed()){
       numPoints = 5;
-      //drawtag = 1;
       plot();
       view5.alarm = true;
       view10.alarm = false;
@@ -294,7 +288,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
     if(view10.pressed()){
       numPoints = 10;
-      //drawtag = 1;
       plot();
       view10.alarm = true;
       view5.alarm = false;
@@ -304,7 +297,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
     if(view20.pressed()){
       numPoints = 20;
-      //drawtag = 1;
       plot();
       view20.alarm = true;
       view5.alarm = false;
@@ -314,7 +306,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
      if(view50.pressed()){
       numPoints = 50;
-      //drawtag = 1;
       plot();
       view50.alarm = true;
       view5.alarm = false;
@@ -324,7 +315,6 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     }
      if(viewAll.pressed()){
       numPoints = 2000;
-      //drawtag = 1;
       plot();
       viewAll.alarm = true;
       view5.alarm = false;
@@ -348,11 +338,9 @@ void importData(){
     for (int index = 1; index < foldernames.length; index++){
       
       directory = "logs/perry/" + foldernames[index] + "/SW48A" + filename;
-
       logfiletemp = loadStrings(directory);
-      //println(logfiletemp[0]);
-      
-      
+
+      // add the datestamp
       for (int j = 0; j < logfiletemp.length; j++){
         logfiletemp[j] = concat(foldernames[index] + ", ", logfiletemp[j]);
       }
@@ -370,7 +358,7 @@ void importData(){
     }
   
     println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length - 1]);
-  
+    numdays = foldernames.length;
 }
 
 
@@ -380,6 +368,7 @@ void importData(){
 // ******************************************************************************************
 
 void setup(){
+  println("Setup");
   size(650, 500, JAVA2D);
   PFont f;
   f = loadFont("Dialog.plain-48.vlw");
@@ -393,7 +382,6 @@ void setup(){
   sidebarMargin = (int)round(1.5*xaxislocation + axisscale); 
   buttony = (int)round(yaxislocation);
   int tabwidth = 3*buttony; // set the width of the top tabs
-
   
   // Create the buttons
   // RectButton(x, y, width, height, default c, highlight c, alarm c, text)
@@ -416,60 +404,7 @@ void setup(){
   }
   importData();
   plot();
-  // IMPORT DATA FROM THE LOG FILES
-    
-//    // import the data from the log file
-//    String dirtest = dataPath("");
-//    println(dirtest);
-    
-//    println(dataPath("/home/ginman/Processing/loganalysis/data/logs/perry"));
-    
-//    File dir = new File(dataPath("/home/ginman/Processing/loganalysis/data/logs/perry"));
 
-
-//    File dir = new File("/var/www/logs/perry");
-//    String[] foldernames = dir.list();
-    
-    /*
-    String[] foldernames = loadStrings("foldernames.txt");
- 
-    //String[] foldernames = splitTokens(foldernames2);
-
-//    directory = url + "logs/perry/" + foldernames[0] + "/SW48A" + filename;
-    directory = "logs/perry/" + foldernames[0] + "/SW48A" + filename;
-    logfile = loadStrings(directory);
-    
-    for (int j = 0; j < logfile.length; j++){
-      logfile[j] = concat(foldernames[0] + ", ", logfile[j]);
-    }
-    
-    for (int index = 1; index < foldernames.length -1; index++){
-      
-      directory = "logs/perry/" + foldernames[index] + "/SW48A" + filename;
-
-      logfiletemp = loadStrings(directory);
-      //println(logfiletemp[0]);
-      
-      
-      for (int j = 0; j < logfiletemp.length; j++){
-        logfiletemp[j] = concat(foldernames[index] + ", ", logfiletemp[j]);
-      }
-      
-      if (logfiletemp==null){
-        println("No templog file found");
-      }
-      else{
-        //splice(logfile,logfiletemp, 0);
-        
-        logfile = concat(logfile,logfiletemp);
-        //println(logfile);
-       
-      }
-    }
-  
-    println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length -2]);
-    println(currentView.buttonText);
-    */
 }
 
 
@@ -689,21 +624,64 @@ void plot(){
   stroke(0);
   rectMode(CENTER);
   
-  for(int index = 0; index < numPoints; index++){
-   
-    if(index == pointhighlight){
-      stroke(185, 0, 0);
-      fill(0);
-      rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
-      stroke(0);
-      fill(255);
+  int xpoint = 0;
+  String newday;
+  String oldday;
+  int plotmode = 1;
+  
+  if (plotmode == 0){
+    for(int index = 0; index < numPoints; index++){
+     
+      if(index == pointhighlight){ // make the highlighted point red
+        stroke(185, 0, 0);
+        fill(0);
+        rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
+        stroke(0);
+        fill(255);
+      }
+      else{
+        rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
+      }
+      
+      xpoints[index] = xaxisdiv*index+xaxislocation;
+      ypoints[index] = height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation; 
     }
-    else{
-      rect(xaxisdiv*index+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
-    }
+  //println(numdays);  
+  }
+  else{
+    xaxisdiv = axisscale/numdays;
+    //numPoints = numdays;
+    for(int index = 0; index < graphArray.length; index++){
+      if (index == 0){
+        newday = datestamp[index];
+        oldday = datestamp[index];
+      }
+      else{
+        newday = datestamp[index];
+        oldday = datestamp[index-1];
+      }        
+      
+      if (newday.equals(oldday) == false){ // increment xaxis point only on day changes 
+        xpoint = xpoint + 1;
+        //stroke(150);
+        //line(xaxisdiv*xpoint+xaxislocation, buttony, xaxisdiv*xpoint+xaxislocation, height - buttony);
+      }
+        
+      if(index == pointhighlight){ // make the highlighted point red
+        stroke(185, 0, 0);
+        fill(0);
+        rect(xaxisdiv*xpoint+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
+        stroke(0);
+        fill(255);
+      }
+      else{
+        rect(xaxisdiv*xpoint+xaxislocation, height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation,3,3);
+      }
     
-    xpoints[index] = xaxisdiv*index+xaxislocation;
-    ypoints[index] = height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation; 
+      xpoints[index] = xaxisdiv*xpoint+xaxislocation;
+      ypoints[index] = height - axisscale*(graphArray[index] - yaxismin)/range-yaxislocation; 
+    
+    }
   }
   
   rectMode(CORNER);
@@ -724,7 +702,6 @@ void plot(){
   text("Platavg: "+platavg[pointhighlight], sidebarMargin,buttony*4.5);
   text("Date: " +datestamp[pointhighlight],sidebarMargin, buttony*5);
   text("Time: " +timestamp[pointhighlight],sidebarMargin, buttony*5.5);
-
   }
   
   drawtag = 0;
