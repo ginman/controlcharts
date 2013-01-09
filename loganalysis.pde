@@ -359,6 +359,7 @@ void importData(){
   
     println("Imported " + logfile.length + " switch movement data logs from " + foldernames[0] + " to " + foldernames[foldernames.length - 1]);
     numdays = foldernames.length;
+    numPoints = logfile.length;
 }
 
 
@@ -368,7 +369,6 @@ void importData(){
 // ******************************************************************************************
 
 void setup(){
-  println("Setup");
   size(650, 500, JAVA2D);
   PFont f;
   f = loadFont("Dialog.plain-48.vlw");
@@ -484,11 +484,13 @@ void plot(){
   float[] inputArray = new float[numPoints];
   float[] graphArray = new float[numPoints];
   
+  /*
   // find if an alarm must be set
   peakTab.alarm = alarmFunction(peak, peakTab.lastViewNumber);
   avgTab.alarm = alarmFunction(avg, avgTab.lastViewNumber);
   platlenTab.alarm = alarmFunction(plattime, platlenTab.lastViewNumber);
   platavgTab.alarm = alarmFunction(platavg, platavgTab.lastViewNumber);
+  */
   
   currentView.lastViewNumber = numPoints;
   
