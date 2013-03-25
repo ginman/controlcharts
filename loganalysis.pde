@@ -30,6 +30,8 @@ int numdays;
 
 //String currentTab = "peak";
 String movementtype = "normal";
+String switchname = "48A";
+String locationname = "perry";
 
 String[] logfile;
 String[] logwaveform;
@@ -37,9 +39,10 @@ String[] logfiletemp;
 String[] timestamp;
 String[] datestamp;
 String directory;
-String filename = "/N48AC.TXT";
+String filename = "/N" + switchname + "C.TXT";
 String url = "http://172.28.64.54/";  
-
+//String[] monthtable;
+String[] monthtable = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 // variables for point highlighting
 int pointhighlight = -1; // index to be highlighted
 float[] xpoints = new float[maxPoints]; // pixel location of each plotted point on the current chart
@@ -223,11 +226,11 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
       //drawtag = 1;
       if(direction.buttonText == "Normal"){
         direction.buttonText = "Reverse";
-        filename = "/R48AC.TXT";
+        filename = "/R" + switchname + "C.TXT";
       }
       else{
         direction.buttonText = "Normal";
-        filename = "/N48AC.TXT";
+        filename = "/N" + switchname + "C.TXT";
       }
       println("Now displaying " + direction.buttonText + " movements.");
       direction.display();
@@ -237,7 +240,8 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
     if(waveform.pressed()){
       timestamptemp = trim(timestamp[pointhighlight]);
       timestamptemp = timestamptemp.substring(0,2) + timestamptemp.substring(3,5) + timestamptemp.substring(6,8);
-      logwaveform = loadStrings("logs/perry/" + trim(datestamp[pointhighlight]) + "/SW48A/" + timestamptemp + "N.TXT"); 
+      println("logs/" + locationname + "/" + trim(datestamp[pointhighlight]) + "/SW" + switchname + "/" + timestamptemp + "N.TXT");
+      logwaveform = loadStrings("logs/" + locationname + "/" + trim(datestamp[pointhighlight]) + "/SW" + switchname + "/" + timestamptemp + "N.TXT"); 
       plot();
     }
     if(peakTab.pressed()){
@@ -328,7 +332,7 @@ void update(int q, int r, float[] ixpoints, float[] iypoints) // takes in mouse 
 void importData(){
     String[] foldernames = loadStrings("foldernames.txt");
 //    directory = url + "logs/perry/" + foldernames[0] + "/SW48A" + filename;
-    directory = "logs/perry/" + foldernames[0] + "/SW48A" + filename;
+    directory = "logs/" + locationname + "/" + foldernames[0] + "/SW" + switchname + filename;
     logfile = loadStrings(directory);
     
     for (int j = 0; j < logfile.length; j++){
@@ -337,7 +341,7 @@ void importData(){
     
     for (int index = 1; index < foldernames.length; index++){
       
-      directory = "logs/perry/" + foldernames[index] + "/SW48A" + filename;
+      directory = "logs/" + locationname+ "/" + foldernames[index] + "/SW" + switchname + filename;
       logfiletemp = loadStrings(directory);
 
       // add the datestamp
@@ -667,6 +671,16 @@ void plot(){
         xpoint = xpoint + 1;
         //stroke(150);
         //line(xaxisdiv*xpoint+xaxislocation, buttony, xaxisdiv*xpoint+xaxislocation, height - buttony);
+      }
+      
+      // if the month has changed, add an xaxis line
+      if (int(newday[0] + newday[1]) != int(oldday[0] + oldday[1])){
+        stroke(153);
+        line(xaxisdiv*xpoint+xaxislocation, height - yaxislocation, xaxisdiv*xpoint+xaxislocation, buttony);
+        stroke(0);
+        fill(153);
+        text(monthtable[int(newday[0] + newday[1])-1], xaxisdiv*xpoint+xaxislocation+5, height - yaxislocation-5);
+        fill(255);
       }
         
       if(index == pointhighlight){ // make the highlighted point red
